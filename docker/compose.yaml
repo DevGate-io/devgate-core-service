@@ -1,0 +1,45 @@
+name: devgate-core-service
+services:
+  # Named core-db, not db: app_network is shared, and a service called `db`
+  # would claim the same network alias as the postgres of the other services.
+  core-db:
+    image: 'postgres:latest'
+    container_name: devgate-core-db
+    restart: unless-stopped
+    env_file:
+      - '../.env'
+    ports:
+      - '5444:5432'
+    networks:
+      - app_network
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+  app:
+    image: amazoncorretto:21.0.9
+    container_name: devgate-core-service
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    ports:
+      - "8092:8092"
+    networks:
+      - app_network
+    volumes:
+      - ../build/libs:/app
+      - ../src/main/resources:/app/src/main/resources
+    command: [ "java", "-jar", "/app/core-service.jar" ]
+    depends_on:
+      core-db:
+        condition: service_healthy
+networks:
+  app_network:
+    external: true
+
+volumes:
+  postgres_data:

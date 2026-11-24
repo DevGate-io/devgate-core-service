@@ -1,0 +1,13 @@
+# The baseline/* changelogs are the unmodified changeSets of the former devgate-user-service,
+# devgate-catalog-service and devgate-scaffolder-service (merged into this service). Never edit
+# them — new schema changes go to db/changelog/changes/ as new files (next sequential prefix).
+databaseChangeLog:
+  - includeAll:
+      path: db/changelog/baseline/identity
+  - includeAll:
+      path: db/changelog/baseline/catalog
+  - includeAll:
+      path: db/changelog/baseline/scaffolder
+  - includeAll:
+      path: db/changelog/changes
+      errorIfMissingOrEmpty: false

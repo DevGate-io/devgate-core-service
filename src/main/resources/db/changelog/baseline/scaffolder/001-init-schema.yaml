@@ -1,0 +1,80 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1784760000000-1
+      author: progger
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            tableName: templates
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_templates
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: slug
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: description
+                  type: VARCHAR(1024)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: integration_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: template_owner
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: template_repo
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        # Postgres does not auto-index a plain reference column (no FK is declared here —
+        # integration_id is an opaque cross-service id, same simplification as Project.teamId
+        # in devgate-catalog-service), so the lookup index is created explicitly.
+        - createIndex:
+            indexName: idx_templates_integration_id
+            tableName: templates
+            columns:
+              - column:
+                  name: integration_id
+        - createTable:
+            tableName: template_tags
+            columns:
+              - column:
+                  name: template_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tag
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: template_tags
+            baseColumnNames: template_id
+            constraintName: fk_template_tags_template
+            referencedTableName: templates
+            referencedColumnNames: id
